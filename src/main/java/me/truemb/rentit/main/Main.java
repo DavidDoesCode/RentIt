@@ -32,9 +32,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.Acrobot.ChestShop.ChestShop;
-import com.jeff_media.updatechecker.UpdateCheckSource;
-import com.jeff_media.updatechecker.UpdateChecker;
-import com.jeff_media.updatechecker.UserAgentBuilder;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
@@ -477,15 +474,15 @@ public class Main extends JavaPlugin {
 	//https://www.spigotmc.org/threads/powerful-update-checker-with-only-one-line-of-code.500010/
 	private void checkForUpdate() {
 		
-		new UpdateChecker(this, UpdateCheckSource.SPIGET, SPIGOT_RESOURCE_ID)
-                .setDownloadLink(SPIGOT_RESOURCE_ID) // You can either use a custom URL or the Spigot Resource ID
-                .setDonationLink("https://www.paypal.me/JacksonUndercover")
-                .setChangelogLink(SPIGOT_RESOURCE_ID) // Same as for the Download link: URL or Spigot Resource ID
-                .setNotifyOpsOnJoin(true) // Notify OPs on Join when a new version is found (default)
-                .setNotifyByPermissionOnJoin(this.getDescription().getName() + ".updatechecker") // Also notify people on join with this permission
-                .setUserAgent(new UserAgentBuilder().addPluginNameAndVersion())
-                .checkEveryXHours(24) // Check every hours
-                .checkNow(); // And check right now
+//		new UpdateChecker(this, UpdateCheckSource.SPIGET, SPIGOT_RESOURCE_ID)
+//                .setDownloadLink(SPIGOT_RESOURCE_ID) // You can either use a custom URL or the Spigot Resource ID
+//                .setDonationLink("https://www.paypal.me/JacksonUndercover")
+//                .setChangelogLink(SPIGOT_RESOURCE_ID) // Same as for the Download link: URL or Spigot Resource ID
+//                .setNotifyOpsOnJoin(true) // Notify OPs on Join when a new version is found (default)
+//                .setNotifyByPermissionOnJoin(this.getDescription().getName() + ".updatechecker") // Also notify people on join with this permission
+//                .setUserAgent(new UserAgentBuilder().addPluginNameAndVersion())
+//                .checkEveryXHours(24) // Check every hours
+//                .checkNow(); // And check right now
         
 	}
 

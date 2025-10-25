@@ -24,9 +24,9 @@ repositories {
         url = uri('https://repo.rosewooddev.io/repository/public/')
     }
 
-    maven {
-        url = uri('https://repo.jeff-media.com/public/')
-    }
+//    maven {
+//        url = uri('https://repo.jeff-media.com/public/')
+//    }
 
     maven {
         url = uri('https://repo.codemc.io/repository/maven-snapshots/')
@@ -60,7 +60,7 @@ dependencies {
     
     api 'net.wesjd:anvilgui:1.10.9-SNAPSHOT'
     api 'org.bstats:bstats-bukkit:3.0.2'
-    api 'com.jeff_media:SpigotUpdateChecker:3.0.4'
+//    api 'com.jeff_media:SpigotUpdateChecker:3.0.4'
     api 'com.google.code.gson:gson:2.10.1'
     
     compileOnly('io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT')
