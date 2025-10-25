@@ -24,6 +24,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -157,7 +158,23 @@ public class HotelAreaListener implements Listener {
 		if(canceled)
 			e.setCancelled(canceled);
     }
-	
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent e) {
+		if(e.getHand() != EquipmentSlot.HAND)
+			return;
+
+		Player p = e.getPlayer();
+		Entity target = e.getRightClicked();
+		Location loc = target.getLocation();
+
+		if(target.hasMetadata("NPC"))
+			return;
+
+		boolean canceled = this.protectedRegion(p, true, loc, true);
+		if(canceled)
+			e.setCancelled(canceled);
+	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityInteraction(PlayerInteractAtEntityEvent e) {
@@ -374,6 +391,9 @@ public class HotelAreaListener implements Listener {
 			return false;
 		
 		if(interacting) {
+			// todo make all wood buttons public
+			if(loc.getBlock().getType().equals(Material.OAK_BUTTON))
+				return false;
 			if(this.instance.manageFile().isSet("Options.categorySettings.HotelCategory." + String.valueOf(rentHandler.getCatID()) + ".interact") && 
 					!this.instance.manageFile().getBoolean("Options.categorySettings.HotelCategory." + String.valueOf(rentHandler.getCatID()) + ".interact")) {
 				if(withMessages)
