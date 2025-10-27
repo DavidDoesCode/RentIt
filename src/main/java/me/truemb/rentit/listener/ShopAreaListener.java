@@ -23,6 +23,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -139,6 +141,22 @@ public class ShopAreaListener implements Listener {
 		if(canceled)
 			e.setCancelled(canceled);
     }
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onHangingBreakGeneral(HangingBreakEvent e) {
+		// This catches explosion-based breaks (like wind charges) that might not trigger HangingBreakByEntityEvent
+		if(e.getCause() == RemoveCause.EXPLOSION) {
+			Entity target = e.getEntity();
+			Location loc = target.getLocation();
+			int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+			RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
+
+			// If this is in a shop region, cancel the explosion damage
+			if (rentHandler != null) {
+				e.setCancelled(true);
+			}
+		}
+	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
     public void onHangingDMG(HangingBreakByEntityEvent e) {
