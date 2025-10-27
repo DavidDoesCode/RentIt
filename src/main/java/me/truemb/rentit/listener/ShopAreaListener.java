@@ -1,5 +1,7 @@
 package me.truemb.rentit.listener;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Location;
@@ -40,6 +42,16 @@ public class ShopAreaListener implements Listener {
 
 	private Main instance;
 	private RentTypes type = RentTypes.SHOP;
+	private static HashSet<Material> publicButtons = new HashSet<>(Set.of(Material.OAK_BUTTON, Material.OAK_PRESSURE_PLATE,
+			Material.DARK_OAK_BUTTON, Material.DARK_OAK_PRESSURE_PLATE,
+			Material.ACACIA_BUTTON, Material.ACACIA_PRESSURE_PLATE, Material.BAMBOO_BUTTON,
+			Material.BAMBOO_PRESSURE_PLATE, Material.BIRCH_BUTTON, Material.BIRCH_PRESSURE_PLATE,
+			Material.CHERRY_BUTTON, Material.CHERRY_PRESSURE_PLATE,
+			Material.JUNGLE_BUTTON, Material.JUNGLE_PRESSURE_PLATE, Material.CRIMSON_BUTTON,
+			Material.CRIMSON_PRESSURE_PLATE, Material.MANGROVE_BUTTON,
+			Material.MANGROVE_PRESSURE_PLATE, Material.SPRUCE_BUTTON,
+			Material.SPRUCE_PRESSURE_PLATE, Material.WARPED_BUTTON,
+			Material.WARPED_PRESSURE_PLATE));
 	
 	public ShopAreaListener(Main plugin) {
 		this.instance = plugin;
@@ -438,6 +450,8 @@ public class ShopAreaListener implements Listener {
 			return false;
 
 		if(interacting) {
+			if(publicButtons.contains(loc.getBlock().getType()))
+				return false;
 			if(this.instance.manageFile().isSet("Options.categorySettings.ShopCategory." + String.valueOf(rentHandler.getCatID()) + ".interact") && 
 					!this.instance.manageFile().getBoolean("Options.categorySettings.ShopCategory." + String.valueOf(rentHandler.getCatID()) + ".interact")) {
 				if(withMessages)
