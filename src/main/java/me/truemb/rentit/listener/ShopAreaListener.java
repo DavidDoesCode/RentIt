@@ -154,19 +154,23 @@ public class ShopAreaListener implements Listener {
 			e.setCancelled(canceled);
     }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onHangingBreakGeneral(HangingBreakEvent e) {
-		// This catches explosion-based breaks (like wind charges) that might not trigger HangingBreakByEntityEvent
-		if(e.getCause() == RemoveCause.EXPLOSION) {
-			Entity target = e.getEntity();
-			Location loc = target.getLocation();
-			int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
-			RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
+		// Debug logging
+		this.instance.getLogger().info("[DEBUG] HangingBreakEvent - Cause: " + e.getCause() + ", Entity: " + e.getEntity().getType());
 
-			// If this is in a shop region, cancel the explosion damage
-			if (rentHandler != null) {
-				e.setCancelled(true);
-			}
+		// Check ALL causes, not just explosions, to see what's actually happening
+		Entity target = e.getEntity();
+		Location loc = target.getLocation();
+		int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+		RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
+
+		this.instance.getLogger().info("[DEBUG] ShopId: " + shopId + ", Handler exists: " + (rentHandler != null));
+
+		// If this is in a shop region, cancel ALL breaking (we'll allow it through other handlers for players)
+		if (rentHandler != null) {
+			e.setCancelled(true);
+			this.instance.getLogger().info("[DEBUG] Event cancelled for shop protection");
 		}
 	}
 
@@ -175,6 +179,8 @@ public class ShopAreaListener implements Listener {
 
 		Player p = null;
 		Entity remover = e.getRemover();
+
+		this.instance.getLogger().info("[DEBUG] HangingBreakByEntityEvent - Remover: " + (remover != null ? remover.getType().name() : "NULL"));
 
 		if(remover instanceof Player)
 			p = (Player) remover;
@@ -191,9 +197,12 @@ public class ShopAreaListener implements Listener {
 				int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
 				RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
 
+				this.instance.getLogger().info("[DEBUG] Wind charge detected - ShopId: " + shopId + ", Handler: " + (rentHandler != null));
+
 				// If this is in a shop region, cancel the event (only shop owners should be able to damage hanging entities)
 				if (rentHandler != null) {
 					e.setCancelled(true);
+					this.instance.getLogger().info("[DEBUG] Wind charge event cancelled");
 				}
 				return;
 			}
