@@ -135,17 +135,35 @@ public class ShopAreaListener implements Listener {
 			e.setCancelled(canceled);
     }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDMG(EntityDamageByEntityEvent e) {
-		
 		Player p = null;
-		if(e.getDamager() instanceof Player)
-			p = (Player) e.getDamager();
-		else if(e.getDamager() instanceof AbstractArrow && ((AbstractArrow) e.getDamager()).getShooter() instanceof Player)
-			p = (Player) ((AbstractArrow) e.getDamager()).getShooter();
-		
+		Entity damager = e.getDamager();
+
+		if(damager instanceof Player)
+			p = (Player) damager;
+		else if(damager instanceof AbstractArrow && ((AbstractArrow) damager).getShooter() instanceof Player)
+			p = (Player) ((AbstractArrow) damager).getShooter();
+		else {
+			// Check for wind charge explosions damaging item frames and other entities
+			String damagerType = damager != null ? damager.getType().name() : "";
+			if(damagerType.equals("WIND_CHARGE") || damagerType.equals("BREEZE_WIND_CHARGE")) {
+				// Check if the damaged entity is in a protected shop region
+				Entity target = e.getEntity();
+				Location loc = target.getLocation();
+				int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+				RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
+
+				// If this is in a shop region, cancel the wind charge damage
+				if (rentHandler != null) {
+					e.setCancelled(true);
+				}
+				return;
+			}
+		}
+
 		if(p == null) return;
-		
+
 		Entity target = e.getEntity();
 		Location loc = target.getLocation();
 
@@ -154,23 +172,19 @@ public class ShopAreaListener implements Listener {
 			e.setCancelled(canceled);
     }
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onHangingBreakGeneral(HangingBreakEvent e) {
-		// Debug logging
-		this.instance.getLogger().info("[DEBUG] HangingBreakEvent - Cause: " + e.getCause() + ", Entity: " + e.getEntity().getType());
+		// This catches explosion-based breaks (like wind charges) that might not trigger HangingBreakByEntityEvent
+		if(e.getCause() == RemoveCause.EXPLOSION) {
+			Entity target = e.getEntity();
+			Location loc = target.getLocation();
+			int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+			RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
 
-		// Check ALL causes, not just explosions, to see what's actually happening
-		Entity target = e.getEntity();
-		Location loc = target.getLocation();
-		int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
-		RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
-
-		this.instance.getLogger().info("[DEBUG] ShopId: " + shopId + ", Handler exists: " + (rentHandler != null));
-
-		// If this is in a shop region, cancel ALL breaking (we'll allow it through other handlers for players)
-		if (rentHandler != null) {
-			e.setCancelled(true);
-			this.instance.getLogger().info("[DEBUG] Event cancelled for shop protection");
+			// If this is in a shop region, cancel the explosion damage
+			if (rentHandler != null) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -179,8 +193,6 @@ public class ShopAreaListener implements Listener {
 
 		Player p = null;
 		Entity remover = e.getRemover();
-
-		this.instance.getLogger().info("[DEBUG] HangingBreakByEntityEvent - Remover: " + (remover != null ? remover.getType().name() : "NULL"));
 
 		if(remover instanceof Player)
 			p = (Player) remover;
@@ -197,12 +209,9 @@ public class ShopAreaListener implements Listener {
 				int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
 				RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
 
-				this.instance.getLogger().info("[DEBUG] Wind charge detected - ShopId: " + shopId + ", Handler: " + (rentHandler != null));
-
 				// If this is in a shop region, cancel the event (only shop owners should be able to damage hanging entities)
 				if (rentHandler != null) {
 					e.setCancelled(true);
-					this.instance.getLogger().info("[DEBUG] Wind charge event cancelled");
 				}
 				return;
 			}
