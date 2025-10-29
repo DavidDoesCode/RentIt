@@ -25,6 +25,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -137,10 +138,29 @@ public class HotelAreaListener implements Listener {
     public void onEntityDMG(EntityDamageByEntityEvent e) {
 
 		Player p = null;
-		if(e.getDamager() instanceof Player)
-			p = (Player) e.getDamager();
-		else if(e.getDamager() instanceof AbstractArrow && ((AbstractArrow) e.getDamager()).getShooter() instanceof Player)
-			p = (Player) ((AbstractArrow) e.getDamager()).getShooter();
+		Entity damager = e.getDamager();
+
+		if(damager instanceof Player)
+			p = (Player) damager;
+		else if(damager instanceof AbstractArrow && ((AbstractArrow) damager).getShooter() instanceof Player)
+			p = (Player) ((AbstractArrow) damager).getShooter();
+		else {
+			// Check for wind charge explosions damaging item frames and other entities
+			String damagerType = damager != null ? damager.getType().name() : "";
+			if(damagerType.equals("WIND_CHARGE") || damagerType.equals("BREEZE_WIND_CHARGE")) {
+				// Check if the damaged entity is in a protected shop region
+				Entity target = e.getEntity();
+				Location loc = target.getLocation();
+				int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+				RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
+
+				// If this is in a shop region, cancel the wind charge damage
+				if (rentHandler != null) {
+					e.setCancelled(true);
+				}
+				return;
+			}
+		}
 		
 		if(p == null) return;
 		
@@ -151,6 +171,22 @@ public class HotelAreaListener implements Listener {
 		if(canceled)
 			e.setCancelled(canceled);
     }
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onHangingBreakGeneral(HangingBreakEvent e) {
+		// This catches explosion-based breaks (like wind charges) that might not trigger HangingBreakByEntityEvent
+		if(e.getCause() == HangingBreakEvent.RemoveCause.EXPLOSION) {
+			Entity target = e.getEntity();
+			Location loc = target.getLocation();
+			int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+			RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
+
+			// If this is in a shop region, cancel the explosion damage
+			if (rentHandler != null) {
+				e.setCancelled(true);
+			}
+		}
+	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
     public void onHangingDMG(HangingBreakByEntityEvent e) {

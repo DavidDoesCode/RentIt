@@ -172,7 +172,7 @@ public class ShopAreaListener implements Listener {
 			e.setCancelled(canceled);
     }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onHangingBreakGeneral(HangingBreakEvent e) {
 		// This catches explosion-based breaks (like wind charges) that might not trigger HangingBreakByEntityEvent
 		if(e.getCause() == RemoveCause.EXPLOSION) {
@@ -198,24 +198,6 @@ public class ShopAreaListener implements Listener {
 			p = (Player) remover;
 		else if(remover instanceof AbstractArrow && ((AbstractArrow) remover).getShooter() instanceof Player)
 			p = (Player) ((AbstractArrow) remover).getShooter();
-		else {
-			// Check for wind charge explosions - wind charges don't have a direct shooter,
-			// so we need to cancel all wind charge damage in protected regions
-			String entityType = remover != null ? remover.getType().name() : "";
-			if(entityType.equals("WIND_CHARGE") || entityType.equals("BREEZE_WIND_CHARGE")) {
-				// Check if location is in a protected shop region
-				Entity target = e.getEntity();
-				Location loc = target.getLocation();
-				int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
-				RentTypeHandler rentHandler = instance.getMethodes().getTypeHandler(this.type, shopId);
-
-				// If this is in a shop region, cancel the event (only shop owners should be able to damage hanging entities)
-				if (rentHandler != null) {
-					e.setCancelled(true);
-				}
-				return;
-			}
-		}
 
 		if(p == null) return;
 
