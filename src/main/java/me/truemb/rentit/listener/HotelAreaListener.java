@@ -50,7 +50,7 @@ public class HotelAreaListener implements Listener {
 			Material.CRIMSON_PRESSURE_PLATE, Material.MANGROVE_BUTTON,
 			Material.MANGROVE_PRESSURE_PLATE, Material.SPRUCE_BUTTON,
 			Material.SPRUCE_PRESSURE_PLATE, Material.WARPED_BUTTON,
-			Material.WARPED_PRESSURE_PLATE));
+			Material.WARPED_PRESSURE_PLATE, Material.PALE_OAK_BUTTON, Material.PALE_OAK_PRESSURE_PLATE));
 	
 	public HotelAreaListener(Main plugin) {
 		this.instance = plugin;
