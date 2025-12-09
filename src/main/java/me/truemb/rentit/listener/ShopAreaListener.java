@@ -147,7 +147,7 @@ public class ShopAreaListener implements Listener {
 		else {
 			// Check for wind charge explosions damaging item frames and other entities
 			String damagerType = damager != null ? damager.getType().name() : "";
-			if(damagerType.equals("WIND_CHARGE") || damagerType.equals("BREEZE_WIND_CHARGE")) {
+			if(damagerType.equals("ENDER_PEARL") || damagerType.equals("WIND_CHARGE") || damagerType.equals("BREEZE_WIND_CHARGE")) {
 				// Check if the damaged entity is in a protected shop region
 				Entity target = e.getEntity();
 				Location loc = target.getLocation();
