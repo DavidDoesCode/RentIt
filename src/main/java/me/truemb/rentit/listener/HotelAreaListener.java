@@ -26,6 +26,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -36,6 +37,7 @@ import me.truemb.rentit.enums.CategorySettings;
 import me.truemb.rentit.enums.RentTypes;
 import me.truemb.rentit.handler.RentTypeHandler;
 import me.truemb.rentit.main.Main;
+import org.bukkit.inventory.Inventory;
 
 public class HotelAreaListener implements Listener {
 
@@ -147,7 +149,8 @@ public class HotelAreaListener implements Listener {
 		else {
 			// Check for wind charge explosions damaging item frames and other entities
 			String damagerType = damager != null ? damager.getType().name() : "";
-			if(damagerType.equals("ENDER_PEARL") || damagerType.equals("WIND_CHARGE") || damagerType.equals("BREEZE_WIND_CHARGE")) {
+			if(damagerType.equals("ENDER_PEARL") || damagerType.equals("WIND_CHARGE")
+					|| damagerType.equals("BREEZE_WIND_CHARGE") || damagerType.equals("SNOWBALL")) {
 				// Check if the damaged entity is in a protected shop region
 				Entity target = e.getEntity();
 				Location loc = target.getLocation();
@@ -394,6 +397,8 @@ public class HotelAreaListener implements Listener {
 				if(e.getHand() == EquipmentSlot.HAND)
 					p.sendMessage(this.instance.getMessage("notHotelOwner"));
 			}
+//		}else if(b.getType() == Material.LECTERN) {
+//				return;
 		}else{
 			
 			if(b.getState() instanceof Sign) {

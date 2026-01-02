@@ -27,6 +27,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -37,6 +38,7 @@ import me.truemb.rentit.enums.CategorySettings;
 import me.truemb.rentit.enums.RentTypes;
 import me.truemb.rentit.handler.RentTypeHandler;
 import me.truemb.rentit.main.Main;
+import org.bukkit.inventory.Inventory;
 
 public class ShopAreaListener implements Listener {
 
@@ -147,7 +149,8 @@ public class ShopAreaListener implements Listener {
 		else {
 			// Check for wind charge explosions damaging item frames and other entities
 			String damagerType = damager != null ? damager.getType().name() : "";
-			if(damagerType.equals("ENDER_PEARL") || damagerType.equals("WIND_CHARGE") || damagerType.equals("BREEZE_WIND_CHARGE")) {
+			if(damagerType.equals("ENDER_PEARL") || damagerType.equals("WIND_CHARGE")
+					|| damagerType.equals("BREEZE_WIND_CHARGE") || damagerType.equals("SNOWBALL")) {
 				// Check if the damaged entity is in a protected shop region
 				Entity target = e.getEntity();
 				Location loc = target.getLocation();
@@ -384,28 +387,30 @@ public class ShopAreaListener implements Listener {
 			
 		}else if(b.getType() == Material.CHEST || b.getType() == Material.BARREL) {
 			//CHEST INTERACTION
-			
+
 			int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
 
-		    RentTypeHandler rentHandler = this.instance.getMethodes().getTypeHandler(this.type, shopId);
-		    
-		    //DOES SHOP EXISTS?
+			RentTypeHandler rentHandler = this.instance.getMethodes().getTypeHandler(this.type, shopId);
+
+			//DOES SHOP EXISTS?
 			if (rentHandler == null)
 				return;
-			
+
 			//Is Chest from ChestShop? If yes, then allow the usage
-			if(this.instance.getChestShopApi() != null && this.instance.getChestShopApi().isShopChest(b))
+			if (this.instance.getChestShopApi() != null && this.instance.getChestShopApi().isShopChest(b))
 				return;
-		    
-			if(!p.hasPermission(this.instance.manageFile().getString("Permissions.bypass.chests")) 
+
+			if (!p.hasPermission(this.instance.manageFile().getString("Permissions.bypass.chests"))
 					&& (!this.instance.getMethodes().hasPermission(this.type, shopId, uuid, this.instance.manageFile().getString("UserPermissions.shop.Fill")) &&
 					!this.instance.getMethodes().hasPermission(this.type, shopId, uuid, this.instance.manageFile().getString("UserPermissions.shop.Admin")))) {
-				
+
 				e.setCancelled(true);
-				
-				if(e.getHand() == EquipmentSlot.HAND)
+
+				if (e.getHand() == EquipmentSlot.HAND)
 					p.sendMessage(this.instance.getMessage("notShopOwner"));
 			}
+//		}else if(b.getType() == Material.LECTERN) {
+//			return;
 		}else {
 			
 			if(b.getState() instanceof Sign) {
@@ -435,6 +440,62 @@ public class ShopAreaListener implements Listener {
 			}
 		}
     }
+
+//	@EventHandler(ignoreCancelled = true)
+//	public void onLecternClick(InventoryClickEvent e) {
+//		if (!(e.getWhoClicked() instanceof Player p)) return;
+//
+//		Inventory inv = e.getInventory();
+//		if (inv.getType() != InventoryType.LECTERN) return;
+//
+//		boolean canceled = this.protectedRegion(p, true, e.getInventory().getLocation(), true);
+//		if(!canceled)
+//			return;
+//
+//		// Example permission check:
+//		// if (canEditLectern(p, e.getInventory().getLocation())) return;
+//
+//		// Any click involving the lectern slot or moving items into it
+//		boolean affectsLectern =
+//				e.getRawSlot() == 0 // slot 0 is the lectern book slot (top inventory)
+//						|| e.getClick() == ClickType.SHIFT_LEFT
+//						|| e.getClick() == ClickType.SHIFT_RIGHT
+//						|| e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
+//						|| e.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD
+//						|| e.getAction() == InventoryAction.HOTBAR_SWAP
+//						|| e.getAction() == InventoryAction.SWAP_WITH_CURSOR
+//						|| e.getAction() == InventoryAction.PLACE_ALL
+//						|| e.getAction() == InventoryAction.PLACE_ONE
+//						|| e.getAction() == InventoryAction.PLACE_SOME
+//						|| e.getAction() == InventoryAction.PICKUP_ALL
+//						|| e.getAction() == InventoryAction.PICKUP_HALF
+//						|| e.getAction() == InventoryAction.PICKUP_ONE
+//						|| e.getAction() == InventoryAction.PICKUP_SOME;
+//
+//		// More precise: cancel if the slot is the lectern slot OR the click would move something into the lectern.
+//		if (e.getRawSlot() == 0 || e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+//			e.setCancelled(true);
+//			p.updateInventory(); // helps keep client in sync on some versions
+//		} else if (affectsLectern) {
+//			// Optional: if you want to be extra strict, cancel any action while lectern is open
+//			// e.setCancelled(true);
+//		}
+//	}
+//
+//	@EventHandler(ignoreCancelled = true)
+//	public void onLecternDrag(InventoryDragEvent e) {
+//		if (e.getInventory().getType() != InventoryType.LECTERN) return;
+//
+//		if (!(e.getWhoClicked() instanceof Player p)) return;
+//		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
+//			return;
+//
+//		// If the drag touches the lectern slot (raw slot 0), cancel it
+//		if (e.getRawSlots().contains(0)) {
+//			e.setCancelled(true);
+//			p.updateInventory();
+//		}
+//	}
 	
 	private boolean protectedRegion(Player p, boolean interacting, Location loc, boolean withMessages) {
 		
