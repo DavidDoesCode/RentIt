@@ -450,8 +450,25 @@ public class ShopAreaListener implements Listener {
 		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
 			return;
 
-		e.setCancelled(true);
-		p.sendMessage(this.instance.getMessage("notShopOwner"));
+		int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+		RentTypeHandler rentHandler = this.instance.getMethodes().getTypeHandler(this.type, shopId);
+		if (rentHandler == null)
+			return;
+
+		if(this.instance.getWorldGuard() != null) {
+			if(!this.instance.getMethodes().isMemberFromRegion(this.type, shopId, p.getWorld(), uuid)) {
+				e.setCancelled(true);
+				p.sendMessage(this.instance.getMessage("notShopOwner"));
+				return;
+			}
+			return;
+		}
+
+		if(rentHandler.getOwnerUUID() == null || !rentHandler.getOwnerUUID().equals(uuid) && !this.instance.getAreaFileManager().isMember(this.type, shopId, uuid)) {
+			e.setCancelled(true);
+			p.sendMessage(this.instance.getMessage("notShopOwner"));
+			return;
+		}
 	}
 
 	@EventHandler
@@ -463,7 +480,25 @@ public class ShopAreaListener implements Listener {
 		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
 			return;
 
-		e.setCancelled(true);
+		int shopId = this.instance.getAreaFileManager().getIdFromArea(this.type, loc);
+		RentTypeHandler rentHandler = this.instance.getMethodes().getTypeHandler(this.type, shopId);
+		if (rentHandler == null)
+			return;
+
+		if(this.instance.getWorldGuard() != null) {
+			if(!this.instance.getMethodes().isMemberFromRegion(this.type, shopId, p.getWorld(), uuid)) {
+				e.setCancelled(true);
+				p.sendMessage(this.instance.getMessage("notShopOwner"));
+				return;
+			}
+			return;
+		}
+
+		if(rentHandler.getOwnerUUID() == null || !rentHandler.getOwnerUUID().equals(uuid) && !this.instance.getAreaFileManager().isMember(this.type, shopId, uuid)) {
+			e.setCancelled(true);
+			p.sendMessage(this.instance.getMessage("notShopOwner"));
+			return;
+		}
 	}
 	
 	private boolean protectedRegion(Player p, boolean interacting, Location loc, boolean withMessages) {
