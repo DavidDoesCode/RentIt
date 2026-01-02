@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import io.papermc.paper.event.player.PlayerInsertLecternBookEvent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -26,10 +27,10 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
-import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
@@ -37,7 +38,6 @@ import me.truemb.rentit.enums.CategorySettings;
 import me.truemb.rentit.enums.RentTypes;
 import me.truemb.rentit.handler.RentTypeHandler;
 import me.truemb.rentit.main.Main;
-import org.bukkit.inventory.Inventory;
 
 public class HotelAreaListener implements Listener {
 
@@ -397,8 +397,8 @@ public class HotelAreaListener implements Listener {
 				if(e.getHand() == EquipmentSlot.HAND)
 					p.sendMessage(this.instance.getMessage("notHotelOwner"));
 			}
-//		}else if(b.getType() == Material.LECTERN) {
-//				return;
+		}else if(b.getType() == Material.LECTERN) {
+				return;
 		}else{
 			
 			if(b.getState() instanceof Sign) {
@@ -429,6 +429,31 @@ public class HotelAreaListener implements Listener {
 			}
 		}
     }
+
+	@EventHandler
+	public void onPlayerTakeLecternBookEvent(PlayerTakeLecternBookEvent e) {
+		Player p = e.getPlayer();
+		UUID uuid = p.getUniqueId();
+		Location loc = e.getLectern().getLocation();
+
+		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
+			return;
+
+		e.setCancelled(true);
+		p.sendMessage(this.instance.getMessage("notShopOwner"));
+	}
+
+	@EventHandler
+	public void onPlayerInsertLecternBookEvent(PlayerInsertLecternBookEvent e) {
+		Player p = e.getPlayer();
+		UUID uuid = p.getUniqueId();
+		Location loc = e.getLectern().getLocation();
+
+		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
+			return;
+
+		e.setCancelled(true);
+	}
 	
 	private boolean protectedRegion(Player p, boolean interacting, Location loc, boolean withMessages) {
 		

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import io.papermc.paper.event.player.PlayerInsertLecternBookEvent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,10 +28,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
-import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
@@ -38,7 +39,6 @@ import me.truemb.rentit.enums.CategorySettings;
 import me.truemb.rentit.enums.RentTypes;
 import me.truemb.rentit.handler.RentTypeHandler;
 import me.truemb.rentit.main.Main;
-import org.bukkit.inventory.Inventory;
 
 public class ShopAreaListener implements Listener {
 
@@ -409,8 +409,8 @@ public class ShopAreaListener implements Listener {
 				if (e.getHand() == EquipmentSlot.HAND)
 					p.sendMessage(this.instance.getMessage("notShopOwner"));
 			}
-//		}else if(b.getType() == Material.LECTERN) {
-//			return;
+		}else if(b.getType() == Material.LECTERN) {
+			return;
 		}else {
 			
 			if(b.getState() instanceof Sign) {
@@ -441,61 +441,30 @@ public class ShopAreaListener implements Listener {
 		}
     }
 
-//	@EventHandler(ignoreCancelled = true)
-//	public void onLecternClick(InventoryClickEvent e) {
-//		if (!(e.getWhoClicked() instanceof Player p)) return;
-//
-//		Inventory inv = e.getInventory();
-//		if (inv.getType() != InventoryType.LECTERN) return;
-//
-//		boolean canceled = this.protectedRegion(p, true, e.getInventory().getLocation(), true);
-//		if(!canceled)
-//			return;
-//
-//		// Example permission check:
-//		// if (canEditLectern(p, e.getInventory().getLocation())) return;
-//
-//		// Any click involving the lectern slot or moving items into it
-//		boolean affectsLectern =
-//				e.getRawSlot() == 0 // slot 0 is the lectern book slot (top inventory)
-//						|| e.getClick() == ClickType.SHIFT_LEFT
-//						|| e.getClick() == ClickType.SHIFT_RIGHT
-//						|| e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
-//						|| e.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD
-//						|| e.getAction() == InventoryAction.HOTBAR_SWAP
-//						|| e.getAction() == InventoryAction.SWAP_WITH_CURSOR
-//						|| e.getAction() == InventoryAction.PLACE_ALL
-//						|| e.getAction() == InventoryAction.PLACE_ONE
-//						|| e.getAction() == InventoryAction.PLACE_SOME
-//						|| e.getAction() == InventoryAction.PICKUP_ALL
-//						|| e.getAction() == InventoryAction.PICKUP_HALF
-//						|| e.getAction() == InventoryAction.PICKUP_ONE
-//						|| e.getAction() == InventoryAction.PICKUP_SOME;
-//
-//		// More precise: cancel if the slot is the lectern slot OR the click would move something into the lectern.
-//		if (e.getRawSlot() == 0 || e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-//			e.setCancelled(true);
-//			p.updateInventory(); // helps keep client in sync on some versions
-//		} else if (affectsLectern) {
-//			// Optional: if you want to be extra strict, cancel any action while lectern is open
-//			// e.setCancelled(true);
-//		}
-//	}
-//
-//	@EventHandler(ignoreCancelled = true)
-//	public void onLecternDrag(InventoryDragEvent e) {
-//		if (e.getInventory().getType() != InventoryType.LECTERN) return;
-//
-//		if (!(e.getWhoClicked() instanceof Player p)) return;
-//		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
-//			return;
-//
-//		// If the drag touches the lectern slot (raw slot 0), cancel it
-//		if (e.getRawSlots().contains(0)) {
-//			e.setCancelled(true);
-//			p.updateInventory();
-//		}
-//	}
+	@EventHandler
+	public void onPlayerTakeLecternBookEvent(PlayerTakeLecternBookEvent e) {
+		Player p = e.getPlayer();
+		UUID uuid = p.getUniqueId();
+		Location loc = e.getLectern().getLocation();
+
+		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
+			return;
+
+		e.setCancelled(true);
+		p.sendMessage(this.instance.getMessage("notShopOwner"));
+	}
+
+	@EventHandler
+	public void onPlayerInsertLecternBookEvent(PlayerInsertLecternBookEvent e) {
+		Player p = e.getPlayer();
+		UUID uuid = p.getUniqueId();
+		Location loc = e.getLectern().getLocation();
+
+		if(p.hasPermission(this.instance.manageFile().getString("Permissions.build")))
+			return;
+
+		e.setCancelled(true);
+	}
 	
 	private boolean protectedRegion(Player p, boolean interacting, Location loc, boolean withMessages) {
 		
